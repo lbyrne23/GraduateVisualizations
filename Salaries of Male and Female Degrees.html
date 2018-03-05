@@ -1,0 +1,192 @@
+<html>
+   <head>
+      <title> Salaries of Male and Female Dominated Degrees</title>
+	   <script src="https://cdn.jsdelivr.net/npm/vega@3.0.10"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.1.2"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.0.0"></script>
+      <style>
+         body {
+         font-family: sans-serif;
+         }
+         .vega-actions a {
+         padding: 0.2em;
+         }
+      </style>
+   </head>
+   <body>
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="vertical-align: top;"><strong>Dataset description:</strong></td>
+               <td style="vertical-align: top;"> <a href="https://github.com/fivethirtyeight/data/blob/master/college-majors/recent-grads.csv"> College Majors Recent Graduates Dataset</a> <br> <br>This data set contains information about degrees of recent graduates (aged < 25). It provides information on the gender of each graduate, employment information, and average salaries.
+               </td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Initial questions:</strong></td>
+               <td style="vertical-align: top;">What majors are considered "male" or "female" degrees? Do average salaries differ depending on the dominating gender?</td>
+            </tr>
+         </tbody>
+      </table>
+      <hr />
+      <div id="vis" align="center"></div>
+	  <br>
+	  <br>
+	  <div id="vis2" align="center"></div>
+      <hr />
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Description:&nbsp;</strong></td>
+               <td style="vertical-align: top;">These visualisations show the popularity of each major and the average salary for each gender. Each point represents an major and they are sized according to the number of total graduates. The y-axis gives the degree category while hovering over a point gives the name of the major.</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Insight:</strong></td>
+               <td style="vertical-align: top;">Women appear to dominate in a wider range of categories than men. The graphs show that there are 15 categories that there are more women graduates, while men dominate in 11. Women hold a majority in all the Health related degrees, while men have a majority in the Engineering subjects.<br><br>
+												The graphs also show a difference in the range of salaries - male dominated fields have salaries that range from 25,000 to 110,000. Meanwhile, female dominated fields start at 22,000 and stop at 62,000. The most popular female field (Psychology) pays an average of 30,000 and the most popular male field (General Business) pays an average of 35000.</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Design considerations</strong></td>
+               <td style="vertical-align: top;">I chose this style of graph as it gives information about multiple attributes - popularity of each major, category, and average salary. I chose to do two separate graphs as one single graph became chaotic and overloaded with information. 
+<br><br>
+I chose size to represent the popularity of the degree rather than position along the x-axis. This is because I felt the exact figures of total graduates was not important, but rather each one’s size relation to another. Instead, median salary is represented along the x-axis. This shows the distribution of salary within each of the degree categories.
+<br><br>
+Colour was used to separate the categories from one another and prevent confusion when tracing each mark back to what major it belonged to. Picking out one individual category and seeing where it lies along the salary range is also easier with the colour grouping each mark together. 
+<br><br>
+Combining all of these considerations together, the viewer is able to identify the average salary for each category and what specific fields most graduates choose. Combining the two graphs shows the differences is popular categories and salaries for each field.
+</td>
+            </tr>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Data filtering and transformation:&nbsp;</strong></td>
+               <td style="vertical-align: top;">The dominant gender for each major was found by checking if the ShareWomen attribute was greater than or less than 50%. Each graph only shows the majors where the chosen gender is dominant. For example, women have graduated from Computer Science but it is not shown on the female graph because males dominate that degree.</td>
+            </tr>
+         </tbody>
+      </table>
+      <script type="text/javascript">
+        var FemaleSpec =  {
+          
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv"
+  },
+  "width": 650,
+  "height": 600,
+  "title":"Average Salaries in Female-Dominated Fields",
+
+  "transform": [
+      {
+          "filter": "datum.ShareWomen > 0.5"
+      }
+  ],
+
+  "mark": {
+    "type": "circle",
+    "opacity": 1
+  },
+  "encoding": {
+    "y": {
+      "field": "Major_category",
+      "type": "nominal",
+      "axis": {"title": ""}
+    },
+
+    "x": {
+        "field": "Median", 
+        "bin": {
+            "maxbins": 20
+        },
+        "type": "nominal", 
+        "axis": {"title": "Median Salary ($)", "labelAngle": 45}
+    },
+
+    "size": {
+      "field": "Women",
+      "type": "quantitative",
+      "legend": {
+          "title":"Total Female Graduates",
+          "tickCount": 2,
+          "values": [10000,50000,100000,150000]
+      },
+      "scale": {"range": [100, 3000]}
+    },
+
+    "color": {
+        "field": "Major_category", 
+        "type": "nominal", 
+        "legend": null
+    },
+
+    "tooltip": {
+        "field": "Major",
+        "type": "nominal"
+    }
+  }
+
+        }
+		
+		        var MaleSpec =  {
+          
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv"
+  },
+  "width": 650,
+  "height": 600,
+  "title":"Average Salaries in Male-Dominated Fields",
+
+  "transform": [
+      {
+          "filter": "datum.ShareWomen < 0.5"
+      }
+  ],
+
+  "mark": {
+    "type": "circle",
+    "opacity": 1
+  },
+  "encoding": {
+    "y": {
+      "field": "Major_category",
+      "type": "nominal",
+      "axis": {"title": ""}
+    },
+
+    "x": {
+        "field": "Median", 
+        "bin": {
+            "maxbins": 20
+        },
+        "type": "nominal", 
+        "axis": {"title": "Median Salary ($)", 	"labelAngle": 45}
+    },
+
+    "size": {
+      "field": "Men",
+      "type": "quantitative",
+      "legend": {
+          "title":"Total Male Graduates",
+          "tickCount": 2,
+          "values": [10000,50000,100000,150000]
+      },
+      "scale": {"range": [100, 3000]}
+    },
+
+    "color": {
+        "field": "Major_category", 
+        "type": "nominal", 
+        "legend": null
+    },
+
+    "tooltip": {
+        "field": "Major",
+        "type": "nominal"
+    }
+  }
+
+        }
+		
+		
+            vegaEmbed("#vis", FemaleSpec);
+			vegaEmbed("#vis2", MaleSpec);
+      </script>
+   </body>
+</html>

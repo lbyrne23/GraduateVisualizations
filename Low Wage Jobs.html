@@ -1,0 +1,145 @@
+<html>
+   <head>
+      <title> Low Wage Jobs</title>
+	   <script src="https://cdn.jsdelivr.net/npm/vega@3.0.10"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.1.2"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.0.0"></script>
+      <style>
+         body {
+         font-family: sans-serif;
+         }
+         .vega-actions a {
+         padding: 0.2em;
+         }
+      </style>
+   </head>
+   <body>
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="vertical-align: top;"><strong>Dataset description:</strong></td>
+               <td style="vertical-align: top;"> <a href="https://github.com/fivethirtyeight/data/blob/master/college-majors/recent-grads.csv"> College Majors Recent Graduates Dataset</a> <br> <br>This data set contains information about degrees of recent graduates (aged < 25). It provides information on the gender of each graduate, employment information, and average salaries.
+               </td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Initial questions:</strong></td>
+               <td style="vertical-align: top;">What majors lead to the most low wage jobs? Are there majors that lead to high employment rates, but have most employees working at low wages? What majors are best to have to avoid low wage positions?</td>
+            </tr>
+         </tbody>
+      </table>
+      <hr />
+      <div id="vis" align="center"></div>
+      <hr />
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Description:&nbsp;</strong></td>
+               <td style="vertical-align: top;"> This visualization shows the employment rate of each major. They are ordered from highest to lowest median earnings. The colour represents the major category and the coloured bar represents the percentage employed. The black bar shows the percentage of the total graduates that are working low wage jobs. Hovering over the bar gives the value of the black bar (% of total working in low wage positions).</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Insight:</strong></td>
+               <td style="vertical-align: top;">As expected, the highest earning majors have the lowest percentage of low-income positions. Engineering dominates the top of the list as the highest earning major category. "Naval Architecture" ranks 4th in earnings, but only 60% of graduates are employed. None of the employees work a low-wage job, showing that it is competitive yet guaranteed to earn high if you get in.<br>
+												On the other end of the spectrum, psychology subjects appear to lead to low-earning jobs. Even within the psychology majors there are huge differences in the amount of low wage positions. If you were to go into Educational Psychology there is only a 2% chance you would end up in a low-income job. However for Clinical Psychology, which lies just below it in the rankings, you have a 20% chance of ending up in a low income job.</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Design considerations</strong></td>
+               <td style="vertical-align: top;"> I chose to layer two graphs to display this information. One limitation of this was that vega-lite would not let me sort the majors by % in low wage jobs, only by ranking. However this order did prove to give interesting insights when comparing median earnings to percentage of low wage jobs.<br>
+												The black low-wage bar is slightly opaque to hint that it is not part of the total coloured bar, "pushing" it forward, but is in fact laying on top of it as it's own percentage.<br>
+												I originally had a design that was a normalised bar chart, where the entire area was filled with a proportion representing low wage jobs. However I found including the overall statistic of how many graduates are employed useful, as then employment rates and low wage jobs could be compared.<br>
+												Adding colour to seperate major categories also proved interesting when it highlighted the fact most engineering subjects were the top ranking.</td>
+            </tr>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Data filtering and transformation:&nbsp;</strong></td>
+               <td style="vertical-align: top;"> Entries where Total Graduates or Total Employed equalled 0 were removed. Percentage of graduates employed was calculated with (Employed/Total)*100. Percentage of low earners was calculated using (Low_wage_jobs/Total)*100. It was originally (Low_wage_jobs/Employed)*100 but this proved inconsistent with the bar chart and created misleading proportions.</td>
+            </tr>
+         </tbody>
+      </table>
+      <script type="text/javascript">
+        var lowWage = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv",
+    "format": {
+      "type": "csv"
+    }
+  },
+  "transform": [
+      {
+          "filter":"datum.Total > 0"
+      },
+      {
+          "filter":"datum.Employed > 0"
+      },
+      {
+          "calculate":"(datum.Employed/datum.Total)*100", "as": "pEmployed"
+      },
+      {
+          "calculate":"(datum.Low_wage_jobs/datum.Employed)*100", "as": "pLow"
+      }
+    ],
+
+    "width": 300,
+    "height": 4000,
+	"title": "Employed Graduates & Low Earning Jobs",
+	
+"layer":[
+    {
+  "mark": {
+      "type":"bar"
+  },
+  "encoding": {
+    "y": {
+      "field": "Major",
+      "type": "nominal",
+      "sort": {
+            "op": "count",
+            "order": "ascending"
+         }
+    },
+    "x": {
+      "field":  "pEmployed",
+      "type": "quantitative"
+    },
+    "color":{
+         "field": "Major_category",
+         "legend": {
+           "title":"Major Category"
+         }
+    }
+  }},
+    {
+  "mark": {
+      "type":"bar",
+    "opacity": 0.4
+  },
+  "encoding": {
+    "y": {
+      "field": "Major",
+      "type": "nominal",
+      "sort":{
+            "op": "count",
+            "order": "ascending"
+         }
+    },
+    "x": {
+      "field":  "pLow",
+      "type": "quantitative",
+      "axis":{
+      "title": "% employed and % in low wage positions"
+    }
+    },
+    "color":{
+       "value": "black"
+    },
+    "tooltip": {
+        "field": "pLow",
+        "type": "nominal"
+    }
+  }}]
+}
+		
+		
+            vegaEmbed("#vis", lowWage);
+      </script>
+   </body>
+</html>

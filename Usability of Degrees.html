@@ -1,0 +1,181 @@
+<html>
+   <head>
+      <title> Usability of Degrees</title>
+	   <script src="https://cdn.jsdelivr.net/npm/vega@3.0.10"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.1.2"></script>
+	   <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.0.0"></script>
+      <style>
+         body {
+         font-family: sans-serif;
+         }
+         .vega-actions a {
+         padding: 0.2em;
+         }
+      </style>
+   </head>
+   <body>
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="vertical-align: top;"><strong>Dataset description:</strong></td>
+               <td style="vertical-align: top;"> <a href="https://github.com/fivethirtyeight/data/blob/master/college-majors/recent-grads.csv"> College Majors Recent Graduates Dataset</a> <br> <br>This data set contains information about degrees of recent graduates (aged < 25). It provides information on the gender of each graduate, employment information, and average salaries.
+               </td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Initial questions:</strong></td>
+               <td style="vertical-align: top;">What are the most common majors where graduates don't use their degree to get a job? Are there fields that need a degree in order to be employed? Can some majors be considered a "bad investment" in terms of it not resulting in a paying job?</td>
+            </tr>
+         </tbody>
+      </table>
+      <hr />
+      <div id="vis" style="display:inline; float: left"></div>
+	  <div id="vis2" style="display:inline; float: right"></div>
+      <hr />
+      <table style="width: 850px; margin-left: auto; margin-right: auto;" cellspacing="5" cellpadding="5">
+         <tbody>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Description:&nbsp;</strong></td>
+               <td style="vertical-align: top;">These visualisations show the percentage of graduates that go on to use their degree to get a job. The first visualisation shows the ten majors where the highest percentage of graduates went on to use their degree to attain a job. The second shows the top ten majors where the highest perecntage of graduates went on to become employed in a job that does not require a college degree. Each bar represents the percentage, while hovering over it gives the full name of the major.</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Insight:</strong></td>
+               <td style="vertical-align: top;"> The first graph shows that 80% of nursing graduates go on to be employed in a job requiring a degree, the highest percentage of all the majors. Also notable in the first graph is the abundance of education majors; proving you need an education to give an education. <br><br>
+												The second graph shows that 85% of "Cosmetology Services and Culinary Arts" majors go on to be employed in a job that does not require a degree. I found some of the top majors surprising but after researching the degrees such as "Nuclear, Industrial Radiology, and Biological Technologies", they appear to be courses that train you for lab assistant roles.
+												The top jobs in this graph appear to be roles where employees can be trained on the job without a need for a college education.</td>
+            </tr>
+            <tr>
+               <td style="vertical-align: top;"><strong>Design considerations</strong></td>
+               <td style="vertical-align: top;"> The bar chart became the most effective medium to display the information after testing alternative formats that used scatter plots and size bubbles to represent employment. I wanted the main focus of the graph to be how many graduates from each major ended up in what jobs and a bar chart effectively communicates quantative information.<br>
+												The graph was originally one visualisation that compared the most "useless" degrees, using the same attribute "Non College Jobs". I found this less effective as than using a seperate graph for the attribute "College Jobs", as a clear distinction is made between the graduate being employed and being unemployed. This moves the focus to the degree being needed or not rather than it being an unemployable field. </td>
+            </tr>
+            <tr>
+               <td style="width: 200px; vertical-align: top;"><strong>Data filtering and transformation:&nbsp;</strong></td>
+               <td style="vertical-align: top;"> The percentages were calculated by getting the number employed in college / non college jobs and dividing it by the total employed. Therefore these graphs don't account for those who are unemployed. I made this decision as it focuses more on the job attained by the graduate, assuming that those who are unemployed are looking for a job. <br>
+												The data was again filtered to just display the top 10 majors from each category, so as just to give the signifigant ones.</td>
+            </tr>
+         </tbody>
+      </table>
+      <script type="text/javascript">
+        var use =  
+          {
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv",
+    "format": {
+      "type": "csv"
+    }
+
+  },
+      "width": 250,
+      "height": 300,
+      "title": "Graduates that use their Degree",
+
+  "transform": [
+        {
+          "calculate": "(datum.College_jobs / datum.Employed)*100", "as": "pCollege"
+      },
+      {
+          "filter": "datum.pCollege > 75"
+      },
+      {
+          "filter": "datum.Employed > 0"
+      }
+  ],
+
+  "mark":{
+      "type": "bar"
+  },
+
+  "encoding": {
+      "y": {
+          "field": "Major",
+          "type": "nominal",
+          "sort": {
+            "op": "mean",
+            "field": "pCollege",
+            "order": "descending"
+         },
+         "axis":{"title": ""}
+      },
+      "x": {
+          "field": "pCollege",
+          "type": "quantitative",
+          "aggregate": "mean",
+          "axis":{"title": "% of graduates employed in a job requiring a college degree"}
+      },
+      "color": {
+       "value": "#ff8566"  
+    },
+	"tooltip": {
+        "field": "Major",
+        "type": "nominal"
+    }
+  }
+ } 
+
+
+        
+		
+		var notUse =  
+          {
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/recent-grads.csv",
+    "format": {
+      "type": "csv"
+    }
+
+  },
+      "width": 250,
+      "height": 300,
+      "title": "Graduates that do not use their Degree",
+
+  "transform": [
+        {
+          "calculate": "(datum.Non_college_jobs / datum.Employed)*100", "as": "pNC"
+      },
+      {
+          "filter": "datum.pNC > 65"
+      },
+      {
+          "filter": "datum.Employed > 0"
+      }
+  ],
+
+  "mark":{
+      "type": "bar"
+  },
+
+  "encoding": {
+      "y": {
+          "field": "Major",
+          "type": "nominal",
+          "sort": {
+            "op": "mean",
+            "field": "pNC",
+            "order": "descending"
+         },
+         "axis":{"title": ""}
+      },
+      "x": {
+          "field": "pNC",
+          "type": "quantitative",
+          "aggregate": "mean",
+          "axis":{"title": "% of graduates employed in a job not requiring a college degree"}
+      },
+      "color": {
+       "value": "#9999e6"  
+    },
+	"tooltip": {
+        "field": "Major",
+        "type": "nominal"
+    }
+  }
+ } 
+		
+		
+            vegaEmbed("#vis", use);
+			vegaEmbed("#vis2", notUse);
+      </script>
+   </body>
+</html>
